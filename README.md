@@ -45,6 +45,10 @@ barth_gemini_local_translate_plugin:
 
 No data leaves the browser. All inference runs on-device.
 
+> [!CAUTION]
+> ⚠️ AI translation can contain errors. Do not rely blindly on the output; always review and verify the generated translations for accuracy and appropriate tone before saving.
+
+
 ## Diagnostics
 
 Visit `/admin/gemini-local-translate-plugin/diagnostic` in your admin to verify that the Chrome Prompt API is available.
@@ -61,6 +65,10 @@ sylius_twig_hooks:
         template: '@BarthSyliusGeminiLocalTranslatePlugin/admin/form/translations/button.html.twig'
         priority: -10
 ```
+
+## Credits
+
+This plugin was inspired by the [GromNaN/local-browser-translator](https://github.com/GromNaN/local-browser-translator) repository.
 
 ## Demo
 
