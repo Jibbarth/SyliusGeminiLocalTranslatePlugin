@@ -1,13 +1,16 @@
 {
-    "version": "0.0.1",
     "name": "barth/sylius-gemini-local-translate-plugin",
     "type": "symfony-bundle",
     "license": "MIT",
     "description": "Translate with ease thanks to gemini local on chrome",
-    "minimum-stability": "stable",
+    "keywords": [
+        "sylius-plugin",
+        "symfony-ux"
+    ],
     "require": {
         "php": ">=8.1",
-        "symfony/framework-bundle": "^6.4|^7.0"
+        "symfony/framework-bundle": "^6.4|^7.0|^8.0",
+        "sylius/twig-hooks": ">=0.1"
     },
     "config": {
         "sort-packages": true
@@ -15,14 +18,6 @@
     "autoload": {
         "psr-4": {
             "Barth\\SyliusGeminiLocalTranslatePlugin\\": "src/"
-        }
-    },
-    "keywords": [
-        "symfony-ux"
-    ],
-    "autoload-dev": {
-        "psr-4": {
-            "Barth\\SyliusGeminiLocalTranslatePlugin\\Tests\\": "tests/"
         }
     }
 }
