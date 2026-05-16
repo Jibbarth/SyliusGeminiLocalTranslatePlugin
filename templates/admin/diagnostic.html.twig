@@ -104,7 +104,7 @@
                     const api = getLanguageModelApi();
                     const targetLang = testTargetLang.value;
 
-                    const prompt = 'Translate the following text into' + targetLang + '. Return only the translated text:\n\n' + text;
+                    const prompt = 'Translate the following text into ' + targetLang + '. Return only the translated text:\n\n' + text;
                     const session = await api.create();
                     const response = await session.prompt(prompt);
                     session.destroy?.();

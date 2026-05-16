@@ -3,12 +3,15 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static targets = ['loader'];
 
-    connect() {
+    async connect() {
         this.running = false;
+        if (await this.isApiAvailable()) {
+            this.element.classList.remove('d-none');
+        }
     }
 
     async translate() {
-        if (this.running) {
+        if (this.running || !await this.isApiAvailable()) {
             return;
         }
         this.running = true;
@@ -20,6 +23,15 @@ export default class extends Controller {
             this.hideLoader();
             this.running = false;
         }
+    }
+
+    async isApiAvailable() {
+        return !!(
+            window.LanguageModel || 
+            (window.ai && window.ai.languageModel) || 
+            (self.ai && self.ai.languageModel) || 
+            (window.chrome && window.chrome.ai && window.chrome.ai.ask)
+        );
     }
 
     async requestTranslation() {
