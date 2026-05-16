@@ -1,0 +1,32 @@
+barth:
+    gemini_local:
+        admin_menu:
+            diagnostic: 'Diagnostic Gemini Local Translate'
+        form:
+            button:
+                translate_with_gemini: 'Traduire avec Gemini'
+            help:
+                translate_with_gemini: 'Traduit automatiquement depuis le champ ci-dessus dans tous les champs de traduction vides.'
+        diagnostic_page:
+            title: 'Diagnostic Gemini Nano'
+            heading: 'Diagnostic Gemini Nano'
+            description: 'Vérifie si Chrome peut utiliser le modèle local et déclenche son téléchargement si nécessaire.'
+            checking: 'Vérification…'
+            available: 'Gemini Nano est disponible. La traduction locale peut fonctionner.'
+            needs_download: 'Chrome est compatible, mais le modèle Gemini Nano doit être téléchargé.'
+            not_available: 'Gemini Nano n''est pas disponible dans ce navigateur.'
+            unavailable_browser: 'Gemini Nano est indisponible. Activez <code>#prompt-api-for-gemini-nano</code> dans <code>chrome://flags</code>, redémarrez Chrome, puis vérifiez <code>chrome://components</code>.'
+            error: 'Erreur lors de la vérification :'
+            download_button: 'Télécharger le modèle Gemini Nano'
+            downloading: 'Téléchargement…'
+            download_in_progress: 'Téléchargement du modèle Gemini Nano…'
+            download_success: 'Le modèle Gemini Nano est prêt. La traduction locale peut fonctionner.'
+            download_error: 'Échec du téléchargement :'
+
+            test_heading: 'Test de traduction'
+            test_source_label: 'Texte source'
+            test_target_label: 'Langue cible'
+            test_button: 'Traduire'
+            test_translating: 'Traduction…'
+            test_error: 'Erreur de traduction'
+            test_result_label: 'Résultat'

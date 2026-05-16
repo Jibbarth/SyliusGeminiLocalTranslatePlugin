@@ -1,0 +1,22 @@
+sylius_twig_hooks:
+  hooks:
+    'sylius_admin.common.create.content.form.translations': &translation_hook
+      gemini_translate_button:
+        template: '@BarthSyliusGeminiLocalTranslatePlugin/admin/form/translations/button.html.twig'
+        priority: -10
+
+    'sylius_admin.common.update.content.form.translations': *translation_hook
+    
+    'sylius_admin.common.create.content.form.sections.translations': *translation_hook
+    'sylius_admin.common.update.content.form.sections.translations': *translation_hook
+    
+    'sylius_admin.taxon.create.content.sections.form.translations': *translation_hook
+    'sylius_admin.taxon.update.content.sections.form.translations': *translation_hook
+    
+    'sylius_admin.common.page':
+        sidebar:
+            template: '@SyliusAdmin/shared/crud/common/sidebar.html.twig'
+            priority: 200
+        navbar:
+            template: '@SyliusAdmin/shared/crud/common/navbar.html.twig'
+            priority: 100

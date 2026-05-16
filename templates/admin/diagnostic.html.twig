@@ -1,0 +1,126 @@
+{% extends '@SyliusAdmin/shared/layout/base.html.twig' %}
+
+{% set prefixes = configuration.vars.hook_prefix is defined ? [configuration.vars.hook_prefix] %}
+{% set prefixes = prefixes|default({})|merge(['sylius_admin.common']) %}
+
+{% block title %}{{ 'barth.gemini_local.diagnostic_page.title'|trans }}{% endblock %}
+
+{% block body %}
+    {% hook 'page' with { _prefixes: prefixes } %}
+    <div class="page-wrapper">
+        <div class="container-xl py-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title">{{ 'barth.gemini_local.diagnostic_page.heading'|trans }}</h1>
+                    <p class="text-muted">{{ 'barth.gemini_local.diagnostic_page.description'|trans }}</p>
+
+                    <div id="gemini-status" class="alert alert-info">{{ 'barth.gemini_local.diagnostic_page.checking'|trans }}</div>
+
+                    <button id="gemini-download" class="btn btn-primary" type="button" hidden>{{ 'barth.gemini_local.diagnostic_page.download_button'|trans }}</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title h5">{{ 'barth.gemini_local.diagnostic_page.test_heading'|trans }}</h2>
+
+                    <div class="mb-3">
+                        <label for="test-source" class="form-label">{{ 'barth.gemini_local.diagnostic_page.test_source_label'|trans }}</label>
+                        <textarea id="test-source" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="test-target-lang" class="form-label">{{ 'barth.gemini_local.diagnostic_page.test_target_label'|trans }}</label>
+                            <select id="test-target-lang" class="form-select">
+                                {% for locale in sylius.channel.locales %}
+                                    <option value="{{ locale.code|replace({'_': '-'}) }}" {{ locale.code == 'en' ? 'selected' : '' }}>{{ locale.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="test-translate" class="btn btn-primary mb-3" type="button">{{ 'barth.gemini_local.diagnostic_page.test_button'|trans }}</button>
+
+                    <div id="test-result" class="border rounded p-3 bg-light" style="min-height:80px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const status = document.getElementById('gemini-status');
+            const download = document.getElementById('gemini-download');
+            const testSource = document.getElementById('test-source');
+            const testTargetLang = document.getElementById('test-target-lang');
+            const testTranslate = document.getElementById('test-translate');
+            const testResult = document.getElementById('test-result');
+
+            function setStatus(type, html) { status.className = 'alert alert-' + type; status.innerHTML = html; }
+            function getLanguageModelApi() { return window.LanguageModel ?? self.ai?.languageModel ?? null; }
+
+            async function getAvailability(api) {
+                if (typeof api.availability === 'function') {
+                    const availability = await api.availability();
+                    if (availability === 'available') return 'available';
+                    if (availability === 'downloadable' || availability === 'downloading') return 'downloadable';
+                    return 'unavailable';
+                }
+                if (typeof api.capabilities === 'function') {
+                    const capabilities = await api.capabilities();
+                    if (capabilities.available === 'readily') return 'available';
+                    if (capabilities.available === 'after-download') return 'downloadable';
+                }
+                return 'unavailable';
+            }
+
+            async function checkCompatibility() {
+                const api = getLanguageModelApi();
+                if (!api) { setStatus('danger', '{{ 'barth.gemini_local.diagnostic_page.unavailable_browser'|trans|e }}'); download.hidden = true; return; }
+                try {
+                    const availability = await getAvailability(api);
+                    if (availability === 'available') { setStatus('success', '{{ 'barth.gemini_local.diagnostic_page.available'|trans|raw }}'); download.hidden = true; return; }
+                    if (availability === 'downloadable') { setStatus('warning', '{{ 'barth.gemini_local.diagnostic_page.needs_download'|trans|raw }}'); download.hidden = false; return; }
+                    setStatus('danger', '{{ 'barth.gemini_local.diagnostic_page.not_available'|trans|e }}'); download.hidden = true;
+                 } catch (error) { setStatus('danger', '{{ 'barth.gemini_local.diagnostic_page.error'|trans|e }}' + error.message ?? error); download.hidden = true; }
+            }
+
+            download.addEventListener('click', async () => {
+                const api = getLanguageModelApi();
+                download.disabled = true; download.textContent = '{{ 'barth.gemini_local.diagnostic_page.downloading'|trans }}'; setStatus('warning', '{{ 'barth.gemini_local.diagnostic_page.download_in_progress'|trans|e }}');
+                try { const session = await api.create(); session.destroy?.(); setStatus('success', '{{ 'barth.gemini_local.diagnostic_page.download_success'|trans|e }}'); download.hidden = true; }
+                catch (error) { setStatus('danger', '{{ 'barth.gemini_local.diagnostic_page.download_error'|trans|e }}' +  error.message ?? error); download.disabled = false; download.textContent = '{{ 'barth.gemini_local.diagnostic_page.download_button'|trans }}'; }
+            });
+
+            testTranslate.addEventListener('click', async () => {
+                const text = testSource.value.trim();
+                if (!text) return;
+
+                testTranslate.disabled = true;
+                testTranslate.textContent = '{{ 'barth.gemini_local.diagnostic_page.test_translating'|trans|e }}';
+                testResult.textContent = '';
+
+                try {
+                    const api = getLanguageModelApi();
+                    const targetLang = testTargetLang.value;
+
+                    const prompt = 'Translate the following text into' + targetLang + '. Return only the translated text:\n\n' + text;
+                    const session = await api.create();
+                    const response = await session.prompt(prompt);
+                    session.destroy?.();
+
+                    const translation = response;
+                    testResult.textContent = translation;
+                } catch (error) {
+                    testResult.textContent = '{{ 'barth.gemini_local.diagnostic_page.test_error'|trans|e }}: ' + (error.message ?? error);
+                } finally {
+                    testTranslate.disabled = false;
+                    testTranslate.textContent = '{{ 'barth.gemini_local.diagnostic_page.test_button'|trans|e }}';
+                }
+            });
+
+            checkCompatibility();
+        })();
+    </script>
+{% endblock %}
+
